@@ -33,13 +33,18 @@ def process_image(image):
 def main():
     while True:
         for record in consumer:
-            if record.key == b"detection_image":
-                bytes_array = np.fromstring(record.value, np.uint8)
-                image = cv2.imdecode(bytes_array, 1)
+            headers = dict(record.headers)
+            if record.key == b"detection_image" and "id" in headers:
+                message_id = headers["id"]
+                image_bytes = np.frombuffer(record.value, np.uint8)
+                image = cv2.imdecode(image_bytes, 1)
                 processed_image = process_image(image)
                 processed_image_bytes = cv2.imencode('.jpg', processed_image)[1]
                 print("face detected")
-                producer.send("face.detect", bytes(processed_image_bytes.tostring()), key=b"detected_face")
+                producer.send(topic="face.detect",
+                              key=b"detected_face",
+                              value=processed_image_bytes.tobytes(),
+                              headers=[("Correlid", message_id)])
 
 
 if __name__ == '__main__':
