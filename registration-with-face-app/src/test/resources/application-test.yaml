@@ -1,0 +1,11 @@
+spring:
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        generate_statistics: true
+  datasource:
+    url: jdbc:tc:postgresql:10-alpine:///test_db
+    driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
